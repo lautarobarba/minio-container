@@ -1,0 +1,26 @@
+name: minio
+services:
+  minio:
+    container_name: minio
+    image: quay.io/minio/minio:latest
+    command: server /data --console-address ":${MINIO_WEB_PORT}"
+    restart: always
+    env_file: .env
+    ports:
+      # server
+      - ${MINIO_SERVER_PORT}:9000
+      # web ui
+      - ${MINIO_WEB_PORT}:${MINIO_WEB_PORT}
+    volumes:
+      - ./data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      start_period: 30s
+      interval: 30s
+      retries: 3
+      timeout: 10s
